@@ -1,5 +1,9 @@
 Revision history for Perl extension Net::Arping.
 
+0.03  Sun Nov  2 14:02:59 CET 2008
+	- maintenance release: port to libnet 1.1; closes bug #33862 and bug #18009
+	- Oleg (the original author) seems to be unreachable; taking over maintenance
+
 0.02  Tue Jul 30 16:06:16 2002
 	- original version; created by h2xs 1.21 with options
 		-A -n Net::Arping

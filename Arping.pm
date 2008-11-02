@@ -19,7 +19,7 @@ use Carp;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $default_timeout);
 
-$VERSION = '0.02'; 
+$VERSION = '0.03'; 
 
 @ISA = qw(Exporter DynaLoader);
 
@@ -145,15 +145,13 @@ is 1 second.
 =head1 DESCRIPTION
 
 The module contains function for testing remote host reachability
-by sending ARP packets.  
+by sending ARP packets.
 
-The program must be run as root or be setuid 
-to root. 
+The program must be run as root or be setuid to root.
 
-For compiling the module you need libnet library 
-(http://www.packetfactory.net/libnet/dist/libnet.tar.gz) 
-and pcap library 
-(http://www.tcpdump.org/daily/libpcap-current.tar.gz). 
+This module uses the libnet and pcap libraries, available here:
+L<http://www.packetfactory.net/libnet/dist/libnet.tar.gz>
+L<http://www.tcpdump.org/#latest>.
 
 =head1 FUNCTIONS
 
@@ -171,7 +169,7 @@ by libnet_select_device function.
 
 =back
 
-=head1 COPYRIGHT                                                                
+=head1 COPYRIGHT
                                                                                 
 Copyright (c) 2002 Oleg Prokopyev. All rights reserved. It's a free software. 
 You can redistribute it and/or modify it under the same terms as Perl 
@@ -184,5 +182,7 @@ pcap(3), libnet(3)
 =head1 AUTHOR
 
 Oleg Prokopyev, E<lt>riiki@gu.netE<gt>
+
+Maintained by Radoslaw Zielinski E<lt>radek@pld-linux.orgE<gt>.
 
 =cut

@@ -27,42 +27,37 @@
 #define ETH_P_IP 0x0800                                                         
 #endif
 
-MODULE = Net::Arping		PACKAGE = Net::Arping		
+MODULE = Net::Arping		PACKAGE = Net::Arping
 
 SV *
 send_arp(dst_ip,timeout,...)
 	char *dst_ip
 	int timeout
 	PREINIT:
-		u_char *device=NULL;
-		STRLEN n_a;		
-	CODE:	
-		
-		u_long rr,src_ip; 
-		u_char *packet;
-		struct sockaddr_in sin;
-		char err_buf[LIBNET_ERRBUF_SIZE];
-		char errbuf[PCAP_ERRBUF_SIZE]; 
-		struct libnet_link_int *network;
-		int packet_size,i;
-		struct ether_addr *src_mac;
+		char *device = NULL;
+		STRLEN n_a;
+	CODE:
+		libnet_t *l;
+		u_int32_t rr,src_ip; 
+		char errbuf[ LIBNET_ERRBUF_SIZE > PCAP_ERRBUF_SIZE ? LIBNET_ERRBUF_SIZE : PCAP_ERRBUF_SIZE ];
+		int packet_size, i;
+		struct libnet_ether_addr *src_mac;
+		libnet_ptag_t ptag;
 
 		struct bpf_program filter;
 		pcap_t *handle;
 		jmp_buf Env;
-		
-	    
-		u_char enet_src[6] = {0x00, 0x00, 0x00, 0x00, 0x00,0x00};
+
 		u_char enet_dst[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}; 
-		
+
 		char filter_app[] = "arp";
-			    
+
 		char ttt[17]="0";
-		
+
 		/*
 		Handle Packet Procedure
-		*/	
-		
+		*/
+
 		void
 		handlepacket(const char *unused, struct pcap_pkthdr *h,u_char *packet)
 		{
@@ -71,15 +66,15 @@ send_arp(dst_ip,timeout,...)
 			u_int32_t ip;
 			unsigned char *cp;
 			unsigned int i;
-			
-			char tt[3];
-			
+
+			char tt[4];
+
 
 			eth = (struct ethhdr*)packet;
 			harp = (struct arphdr*)((char*)eth + sizeof(struct libnet_ethernet_hdr));
 			memcpy(&ip, (char*)harp + harp->ar_hln + sizeof(struct arphdr), 4);
 			cp = (u_char*)harp + sizeof(struct arphdr);
-			
+
 			if ((htons(harp->ar_op) == ARPOP_REPLY)
 				&& (htons(harp->ar_pro) == ETH_P_IP) 
 				&& (htons(harp->ar_hrd) == ARPHRD_ETHER)
@@ -88,86 +83,61 @@ send_arp(dst_ip,timeout,...)
 				strcpy(ttt,"");
 
 				for (i = 0; i < harp->ar_hln-1;i++)
-				{	
-	    			    sprintf(tt,"%.2x:", *cp++);
+				{
+	    			    snprintf(tt, 4, "%.2x:", *cp++);
 				    strcat(ttt,tt);
 				}
-				sprintf(tt,"%.2x", *cp++);
+				snprintf(tt, 3, "%.2x", *cp++);
 				strcat(ttt,tt);
 				longjmp(Env, 1);
 			}
-			
 		}
-		
+
 		void
 		boom()
 		{
 		    longjmp(Env, 1);
 		}    
-		     
+
 		/*
 		*/
-	
-		if( items >2 )	
+
+		if( items >2 )
 		{
-			device=(u_char *)SvPV(ST(2),n_a);
+			device=(char *)SvPV(ST(2),n_a);
 		} 
-		
-		rr=libnet_name_resolve(dst_ip,LIBNET_RESOLVE);
-		if(rr==-1)
-		{
-			croak("bad dst ip address\n");
-		}
-		
-		if(device == NULL) 
-		{
-			if(libnet_select_device(&sin,&device,err_buf) == -1)
-			{
-				croak("libnet_select_device failed:\t %s",err_buf);
-			}
-		}
-		
-		if ((network = libnet_open_link_interface(device, err_buf)) == NULL)
-		{
-			croak("libnet_open_link_interface failed:\t %s",err_buf);
-		}
-		
-		if(!(src_ip = htonl(libnet_get_ipaddr(network,device,err_buf))))
-		{
-			croak("libnet_get_ipaddr failed: \t %s",err_buf);
-		}
-		
-		packet_size=LIBNET_IP_H + LIBNET_ETH_H + LIBNET_ARP_H;
-		
-		
-		if (libnet_init_packet(packet_size, &packet) == -1)
-		{
-			croak("libnet_init_packet failed: \t %s",err_buf);
-		}
-		
-		if (!(src_mac = libnet_get_hwaddr(network,device,err_buf)))
-		{
-			croak("libnet_get_hwaddr failed: \t %s",err_buf);
-		}
-		
-		memcpy(enet_src, src_mac->ether_addr_octet,6);
-		
-		
- 		if(libnet_build_ethernet(enet_dst,enet_src,ETHERTYPE_ARP,NULL,0,packet) == -1)
-		{
-			croak("libnet_build_ethernet failed: \t %s",err_buf);
-		}
-		
-		if(libnet_build_arp(ARPHRD_ETHER,ETHERTYPE_IP,6,4,ARPOP_REQUEST,enet_src,(u_char*)&src_ip,enet_dst,(u_char*)&rr,NULL,0,packet + LIBNET_ETH_H) == -1)
-		{
-			croak("libnet_build_arp failed: \t %s",err_buf);
-		}
-		
+
+		rr = libnet_name2addr4(l, dst_ip, LIBNET_RESOLVE);
+		if (rr == -1) croak("bad dst ip address\n");
+
+		l = libnet_init(LIBNET_LINK, device, errbuf);
+		if (!l) croak("libnet_init() failed: %s", errbuf);
+
+	       	/* in case an IP address has been passed as device name */
+		device = libnet_getdevice(l);
+
+		/* according to documentation, "can be null without error" after previous call */
+		if (!device)
+			device = pcap_lookupdev(errbuf);
+		if (!device)
+			croak("can't obtain the device name, pcap_lookupdev(): %s", errbuf);
+
+		if(!(src_ip = libnet_get_ipaddr4(l)))
+			croak("libnet_get_ipaddr4 failed: %s", libnet_geterror(l));
+		if (!(src_mac = libnet_get_hwaddr(l)))
+			croak("libnet_get_hwaddr failed: %s", libnet_geterror(l));
+
+		ptag = libnet_autobuild_arp(ARPOP_REQUEST, src_mac->ether_addr_octet, (u_int8_t*) &src_ip, enet_dst, (u_int8_t*) &rr, l);
+		if (ptag == -1) croak("building ARP packet failed: %s", libnet_geterror(l));
+
+		ptag = libnet_autobuild_ethernet(enet_dst, ETHERTYPE_ARP, l);
+		if (ptag == -1) croak("building ethernet packet failed: %s", libnet_geterror(l));
+
 		if(!(handle = pcap_open_live(device,100,1,10, errbuf)))
 		{
 			croak("pcap_open_live failed\n");
 		}
-                
+
 		if(pcap_compile(handle,&filter,filter_app,0,-1) == -1)
 		{
 			croak("pcap_compile failed\n");
@@ -179,25 +149,26 @@ send_arp(dst_ip,timeout,...)
 		}
 
 		alarm(timeout);
-		signal(SIGALRM, boom);		
-		
-		
-		i = libnet_write_link_layer(network, device, packet,packet_size);
-		
+		signal(SIGALRM, boom);
+
+		packet_size = libnet_getpacket_size(l);
+		i = libnet_write(l);
+		if (i == -1)
+			croak("libnet_write(): %s", libnet_geterror(l));
+
 		if (setjmp(Env) == 0) {
 		    pcap_loop(handle,0, (pcap_handler)handlepacket, NULL);
 		} 
-		    
-		if(i!=packet_size) 
-		{
+
+		if (i != packet_size)
 			croak("failed, sent only %d bytes\n",i);
-		}
-		
-		libnet_close_link_interface(network);
-		libnet_destroy_packet(&packet); 
-		
+
+		libnet_close_link(l);
+		libnet_destroy(l); 
+		pcap_close(handle);
+
 		RETVAL=newSVpv(ttt,0);
-				
+
 		OUTPUT:
 			RETVAL
-												   
+
