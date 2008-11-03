@@ -3,6 +3,7 @@
 *.bs
 .*.swp
 *.bak
+*.old
 pm_to_blib
 Makefile
 blib
