@@ -25,7 +25,7 @@ SKIP: {
 		ok( $ok, 'ARP-ping at least one IP address' );
 	}
 
-	ok( !$na->arping('192.0.2.1'), 'arping for non-existant address' );    # RFC 3330
+	ok( !$na->arping(Host => '192.0.2.1'), 'arping for non-existant address' );    # RFC 3330
 }
 
 sub find_in_path {

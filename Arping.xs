@@ -169,7 +169,7 @@ send_arp(dst_ip, timeout=1, interface=NULL)
 		libnet_close_link(l);
 		libnet_destroy(l); 
 
-		RETVAL = result;
+		RETVAL = ( result ? result : "0" );  // ARGH!
 
 		OUTPUT:
 			RETVAL

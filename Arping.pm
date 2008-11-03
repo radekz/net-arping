@@ -5,7 +5,7 @@
 # free software; you can redistribute it and/or modify it under the same
 # terms as Perl itself.
 #
-# Comments/suggestions to riiki@gu.net
+# Comments/suggestions to radek@pld-linux.org
 #
 
 package Net::Arping;
@@ -30,88 +30,40 @@ bootstrap Net::Arping $VERSION;
 
 $default_timeout = 1;    # default timeout is 1 second
 
-#  some comment
-#  default_interface - using libnet_select_device function
-
 sub usage {
-	croak(
-		"Usage:\n \t \$q->arpping(\$host) \n or \n \t \$q->arping(Host => \$host [, Interface => \$interface, Timeout =>\$sec])");
+	croak
+	  "Usage:\n \t \$q->arpping(\$host) \n or \n \t \$q->arping(Host => \$host [, Interface => \$interface, Timeout =>\$sec])";
 }
 
 sub new {
 	my $class = shift;
-	my $self  = {};
-	return bless $self, $class;
+	return bless {}, $class;
 }
 
 sub arping {
+	my $self = shift;
+	my ( $host, $result );
 
-	my ($self) = @_;
+	usage() if !@_;
 
-	my ( $host, $interface, $timeout, $result );
-
-	if ( @_ == 1 ) { usage(); }
-
-	$timeout = $default_timeout;
-
-	if ( @_ == 2 ) {    #we have only host
-
-		$host = $_[1];
-		$result = send_arp( $host, $timeout );
-
+	if ( @_ == 1 ) {
+		$host = shift;
+		return send_arp( $host, $default_timeout );
 	}
 	else {
-		my %args;
-		( undef, %args ) = @_;
+		my %args = @_;
 
-		$interface = "";
-		$host      = "";
+		usage()
+		  unless $args{Host} && $args{Host} =~ m/^[A-Za-z0-9-.]+$/
+			  and !exists $args{Timeout} || $args{Timeout} =~ /^\d+$/ && $args{Timeout} > 0
+			  and !exists $args{Interface} || $args{Interface} =~ /^\S+$/;
 
-		foreach ( keys %args ) {
-			if (/^Interface$/) {
-
-				$interface = $args{Interface};
-
-				# just a little test
-				if ( $interface =~ m/^(\s*)$/ ) {
-					croak("hmm... strange interface\n");
-				}
-
-			}
-			elsif (/^Timeout$/) {
-				$timeout = $args{Timeout};
-
-				#one more little test
-				if ( ( !( $timeout =~ m/^(\d+)$/ ) ) || ( $timeout == 0 ) ) {
-					croak("hmm... strange timeout\n");
-				}
-
-			}
-			elsif (/^Host$/) {
-				$host = $args{Host};
-			}
-			else {
-				usage();
-			}
-		}
-
-		if ( !( $host =~ m/^([A-Za-z0-9-.]+)$/ ) ) {
-
-			# just a little test - not very good of course - but ...
-			croak("hmm... strange host\n");
-		}
-		if ( $interface ne "" ) {
-			$result = send_arp( $host, $timeout, $interface );
-		}
-		else {
-			$result = send_arp( $host, $timeout );
-		}
+		return send_arp(
+			$args{Host},
+			( exists $args{Timeout}   ? $args{Timeout}   : $default_timeout ),
+			( exists $args{Interface} ? $args{Interface} : () ),
+		);
 	}
-
-	#	print "test:Host=$host,Interface=$interface,Timeout=$timeout\n";
-	#	print $result,"\n";
-
-	return $result;
 }
 1;
 __END__
@@ -124,25 +76,26 @@ Net::Arping - Ping remote host by ARP packets
 
   use Net::Arping;
   
-  $q=Net::Arping->new();
-  $result=$q->arping($host);
+  $q = Net::Arping->new();
+  $result = $q->arping($host);
 
-  if($result eq "0") {
-        print "Sorry , but $host is dead...\n";
-  } else {
+  if ($result) {
         print "wow... it is alive... Host MAC address is $result\n";
+  }
+  else {
+        print "Sorry , but $host is dead...\n";
   }
 
   You can also specify source interface and timeout. Default timeout
 is 1 second.
 
-  $result=$q->arping(Host => $host,Interface => "eth0",Timeout => "4");	
-  if($result eq "0") {
-	print "Sorry, but $host is dead on device eth0...\n";
-  } else {
+  $result = $q->arping(Host => $host, Interface => 'eth0', Timeout => 4);	
+  if ($result) {
 	print "wow... it is alive... Host MAC address is $result\n";
   }
-	  
+  else {
+	print "Sorry, but $host is dead on device eth0...\n";
+  }
 
 =head1 DESCRIPTION
 
@@ -152,7 +105,7 @@ by sending ARP packets.
 The program must be run as root or be setuid to root.
 
 This module uses the libnet and pcap libraries, available here:
-L<http://www.packetfactory.net/libnet/dist/libnet.tar.gz>
+L<http://www.packetfactory.net/libnet/>
 L<http://www.tcpdump.org/#latest>.
 
 =head1 FUNCTIONS
@@ -163,7 +116,9 @@ L<http://www.tcpdump.org/#latest>.
 
 Create a new arping object.
 
-=item $q->arping($host); $q->arping(Host => $host [, Interface => $interface, Timeout => $sec]); 
+=item $q->arping($host)
+
+=item $q->arping(Host => $host [, Interface => $interface, Timeout => $sec ])
 
 Arping the remote host. Interface and Timeout parameters are optional.
 Default timeout is 1 second. Default device is selected
