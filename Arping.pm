@@ -9,26 +9,24 @@
 #
 
 package Net::Arping;
-
 use strict;
-
-require Exporter;
-require DynaLoader;
-
 use Carp;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $default_timeout);
+require Exporter;
+our @ISA = qw(Exporter);
 
-$VERSION = '0.03';
+our $VERSION    = '0.03_01';
+our $XS_VERSION = $VERSION;
+$VERSION = eval $VERSION;
 
-@ISA = qw(Exporter DynaLoader);
+our @EXPORT    = qw(&arping);
+our @EXPORT_OK = qw(&send_arp);
 
-@EXPORT    = qw(&arping);
-@EXPORT_OK = qw(&send_arp);
+require XSLoader;
+XSLoader::load( 'Net::Arping', $XS_VERSION );
 
-bootstrap Net::Arping $VERSION;
-
-$default_timeout = 1;    # default timeout is 1 second
+use vars qw( $default_timeout );    # backward-compatibility only
+$default_timeout = 1;               # default timeout is 1 second
 
 sub usage {
 	croak

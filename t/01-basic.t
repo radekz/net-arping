@@ -4,7 +4,7 @@ use Test::More tests => 3;
 
 use Net::Arping ();
 
-ok( my $na = Net::Arping->new );
+ok( my $aping = Net::Arping->new );
 
 SKIP: {
 	skip 'UID==0 (root) required', 2 unless $> == 0;
@@ -21,11 +21,11 @@ SKIP: {
 			warn 'tests not reliable; no IP addresses found';
 			skip 'failed to find an IP address to ARP', 1;
 		}
-		my $ok = grep /^(?:[a-f\d]{2}:)+/i, map $na->arping($_), keys %ip;
+		my $ok = grep /^(?:[a-f\d]{2}:)+/i, map $aping->arping($_), keys %ip;
 		ok( $ok, 'ARP-ping at least one IP address' );
 	}
 
-	ok( !$na->arping(Host => '192.0.2.1'), 'arping for non-existant address' );    # RFC 3330
+	ok( !$aping->arping(Host => '192.0.2.1'), 'arping for non-existant address' );    # RFC 3330
 }
 
 sub find_in_path {
