@@ -1,0 +1,8 @@
+*.c
+*.o
+*.bs
+.*.swp
+*.bak
+pm_to_blib
+Makefile
+blib
