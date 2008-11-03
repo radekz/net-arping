@@ -4,5 +4,6 @@ Changes
 Makefile.PL
 MANIFEST
 README
-test.pl
-META.yml                                 Module meta-data (added by MakeMaker)
+META.yml
+t/00-use.t
+t/01-basic.t
