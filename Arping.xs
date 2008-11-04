@@ -52,7 +52,7 @@ send_arp(dst_ip, timeout=1, interface=NULL)
 		struct libnet_ether_addr *src_mac;
 		libnet_ptag_t ptag;
 
-		char *filter_app = "arp [7]==2";
+		char filter_app[35];
 		struct bpf_program filter;
 		pcap_t *handle;
 
@@ -76,6 +76,9 @@ send_arp(dst_ip, timeout=1, interface=NULL)
 
 		rr = libnet_name2addr4(l, dst_ip, LIBNET_RESOLVE);
 		if (rr == -1) croak("bad dst ip address\n");
+		snprintf(filter_app, sizeof(filter_app), "arp [7]==%d and src ", ARPOP_REPLY);
+		strncat(filter_app, libnet_addr2name4(rr, LIBNET_DONT_RESOLVE), sizeof(filter_app)-strlen(filter_app));
+
 		src_ip = libnet_get_ipaddr4(l);
 		if (! src_ip ) croak("libnet_get_ipaddr4 failed: %s", libnet_geterror(l));
 		src_mac = libnet_get_hwaddr(l);
@@ -118,6 +121,7 @@ send_arp(dst_ip, timeout=1, interface=NULL)
 
 			while (timer >= 0) {
 				int res = pcap_next_ex( handle, &h, &packet );
+				//fprintf(stderr, "res=%d\n", res);
 				if ( res == 0 ) {                               // no packets ready for read
 					if ( nap_counter++ < 2 ) {                  // try nanosleep before sleep()
 						struct timespec nap = { 0, 35000 };     // sleep 2x35ms
@@ -135,16 +139,11 @@ send_arp(dst_ip, timeout=1, interface=NULL)
 				else if ( res == 1 ) {                          // read OK; handle the packet
 					struct ethhdr *eth = (struct ethhdr*)packet;
 					struct arphdr *harp = (struct arphdr*)((char*)eth + sizeof(struct libnet_ethernet_hdr));
-					u_int32_t ip;
-					unsigned char *cp;
+					unsigned char *cp = (u_char*)harp + sizeof(struct arphdr);
 
-					memcpy(&ip, (char*)harp + harp->ar_hln + sizeof(struct arphdr), 4);
-					cp = (u_char*)harp + sizeof(struct arphdr);
-
-					if (   htons(harp->ar_op)  == ARPOP_REPLY
-						&& htons(harp->ar_pro) == ETH_P_IP 
+					if (   
+						   htons(harp->ar_pro) == ETH_P_IP 
 						&& htons(harp->ar_hrd) == ARPHRD_ETHER
-						&& (u_int32_t)rr == ip                  // ignore the cached reply
 					   )
 					{
 						char tt[4];

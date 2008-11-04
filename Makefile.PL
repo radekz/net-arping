@@ -2,6 +2,15 @@
 use strict;
 use ExtUtils::MakeMaker;
 
+local $SIG{__WARN__} = sub {
+	if ( @_ && $_[0] =~ /probably harmless.+No library found/i ) {
+		die @_, "ERROR: Net::Arping requires libnet 1.1 (or later) and libpcap";
+	}
+	else {
+		warn @_;
+	}
+};
+
 WriteMakefile(
 	NAME          => 'Net::Arping',
 	VERSION_FROM  => 'Arping.pm',

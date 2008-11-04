@@ -1,5 +1,10 @@
 Revision history for Perl extension Net::Arping.
 
+0.03_01  Tue Nov  4 12:57:27 CET 2008
+	- get rid of signals / longjmp
+	- major cleanup; mostly rewritten; new tests
+	- documentation updates
+
 0.03  Sun Nov  2 14:02:59 CET 2008
 	- maintenance release: port to libnet 1.1; closes bug #33862 and bug #18009
 	- Oleg (the original author) seems to be unreachable; taking over maintenance

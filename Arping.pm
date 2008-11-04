@@ -1,14 +1,5 @@
-#
-# Arping.pm
-#
-# Copyright (c) 2002 Oleg Prokopyev. All rights reserved. This program is
-# free software; you can redistribute it and/or modify it under the same
-# terms as Perl itself.
-#
-# Comments/suggestions to radek@pld-linux.org
-#
-
 package Net::Arping;
+
 use strict;
 use Carp;
 
