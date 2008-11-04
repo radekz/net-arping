@@ -3,7 +3,9 @@ Arping.xs
 Changes
 Makefile.PL
 MANIFEST
+MANIFEST.SKIP
 README
 META.yml
 t/00-use.t
 t/01-basic.t
+.gitignore
