@@ -25,7 +25,7 @@ SKIP: {
 		ok( $ok, 'ARP-ping at least one IP address' );
 	}
 
-	ok( !$aping->arping(Host => '192.0.2.1'), 'arping for non-existant address' );    # RFC 3330
+	ok( !$aping->arping( Host => '192.0.2.1' ), 'arping for non-existant address' );    # RFC 3330
 }
 
 sub find_in_path {
@@ -36,6 +36,8 @@ sub find_in_path {
 		grep -x,
 		map File::Spec->catfile( $_, $program . $Config::Config{_exe} ),
 		qw( /sbin /usr/sbin /usr/local/sbin ),
-		split /:/, $ENV{PATH}
+		File::Spec->path
 	)[0];
 }
+
+# vim: ts=4 sw=4 noet tw=100

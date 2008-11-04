@@ -20,8 +20,12 @@ use vars qw( $default_timeout );    # backward-compatibility only
 $default_timeout = 1;               # default timeout is 1 second
 
 sub usage {
-	croak
-	  "Usage:\n \t \$q->arpping(\$host) \n or \n \t \$q->arping(Host => \$host [, Interface => \$interface, Timeout =>\$sec])";
+	croak << 'EOF';
+Usage:
+	$q->arpping($host)
+ or
+	$q->arping(Host => $host [, Interface => $interface, Timeout => $sec ])
+EOF
 }
 
 sub new {
@@ -133,4 +137,4 @@ Maintained by Radoslaw Zielinski E<lt>radek@pld-linux.orgE<gt>.
 
 =cut
 
-# vim: ts=4 sw=4 noet
+# vim: ts=4 sw=4 noet tw=100

@@ -5,7 +5,7 @@
  * as Perl itself.
  *
  * Thanks to Marvin (marvin@rootbusters.net).
- * I used a little bit his code from 
+ * I used a little bit his code from
  * arping utility in my handlepacket function :)
  *
  * Comments/suggestions to riiki@gu.net
@@ -15,7 +15,7 @@
 #include "perl.h"
 #include "XSUB.h"
 #include <libnet.h>
-#include <pcap.h> 
+#include <pcap.h>
 #include <string.h>
 
 #include <net/if.h>
@@ -23,8 +23,8 @@
 
 #include <setjmp.h>
 
-#ifndef ETH_P_IP                                                                
-#define ETH_P_IP 0x0800                                                         
+#ifndef ETH_P_IP
+#define ETH_P_IP 0x0800
 #endif
 
 #ifndef DEBUG
@@ -40,14 +40,14 @@ MODULE = Net::Arping		PACKAGE = Net::Arping
 PROTOTYPES: ENABLE
 
 char *
-send_arp(dst_ip, timeout=1, interface=NULL) 
+send_arp(dst_ip, timeout=1, interface=NULL)
 		char *dst_ip
 		int  timeout
 		char *interface
 	CODE:
 		char *device;
 		libnet_t *l;
-		u_int32_t rr, src_ip; 
+		u_int32_t rr, src_ip;
 		char errbuf[ LIBNET_ERRBUF_SIZE > PCAP_ERRBUF_SIZE ? LIBNET_ERRBUF_SIZE : PCAP_ERRBUF_SIZE ];
 		struct libnet_ether_addr *src_mac;
 		libnet_ptag_t ptag;
@@ -56,7 +56,7 @@ send_arp(dst_ip, timeout=1, interface=NULL)
 		struct bpf_program filter;
 		pcap_t *handle;
 
-		u_char enet_dst[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}; 
+		u_char enet_dst[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
 		char result[16] = "";
 
@@ -141,8 +141,8 @@ send_arp(dst_ip, timeout=1, interface=NULL)
 					struct arphdr *harp = (struct arphdr*)((char*)eth + sizeof(struct libnet_ethernet_hdr));
 					unsigned char *cp = (u_char*)harp + sizeof(struct arphdr);
 
-					if (   
-						   htons(harp->ar_pro) == ETH_P_IP 
+					if (
+						   htons(harp->ar_pro) == ETH_P_IP
 						&& htons(harp->ar_hrd) == ARPHRD_ETHER
 					   )
 					{
@@ -166,7 +166,7 @@ send_arp(dst_ip, timeout=1, interface=NULL)
 
 		pcap_close(handle);
 		libnet_close_link(l);
-		libnet_destroy(l); 
+		libnet_destroy(l);
 
 		RETVAL = ( result ? result : "0" );  // ARGH!
 
