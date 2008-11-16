@@ -37,9 +37,16 @@ To compile the Arping.xs and to install this module type as usual:
 COPYRIGHT AND LICENCE
 
 Copyright (C) 2002 Oleg Prokopyev (e-mail: riiki@gu.net)
-All rights reserved.
-It's a free software. You can redistribute it and/or modify it under
-the same terms as Perl itself.
+All rights reserved.  It's a free software. You can redistribute it and/or
+modify it under the same terms as Perl itself.
 
-Maintained by Radoslaw Zielinski <radek@pld-linux.orgE>.
+Maintained by Radoslaw Zielinski <radek@pld-linux.org> <http://radek.cc/>.
 
+
+BUGS and PATCHES
+
+Please use the CPAN RT:
+   http://rt.cpan.org/NoAuth/Bugs.html?Dist=Net-Arping
+
+The GIT repository is at:
+   http://github.com/radekz/net-arping/

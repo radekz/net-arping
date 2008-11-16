@@ -8,7 +8,7 @@
  * I used a little bit his code from
  * arping utility in my handlepacket function :)
  *
- * Comments/suggestions to riiki@gu.net
+ * Comments/suggestions to radek@pld-linux.org
  */
 
 #include "EXTERN.h"
@@ -60,7 +60,7 @@ send_arp(dst_ip, timeout=1, interface=NULL)
 
 		char result[16] = "";
 
-		/* leaks file handles if interface==NULL;
+		/* WARNING: leaks file handles if interface==NULL;
 		 * see http://cvs.pld-linux.org/SOURCES/libnet-leaking-fd.patch */
 		l = libnet_init(LIBNET_LINK, interface, errbuf);
 		if (!l) croak("libnet_init() failed: %s", errbuf);

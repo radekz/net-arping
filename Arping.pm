@@ -6,11 +6,10 @@ use Carp;
 require Exporter;
 our @ISA = qw(Exporter);
 
-our $VERSION    = '0.03_01';
+our $VERSION    = '0.03_02';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
-our @EXPORT    = qw(&arping);
 our @EXPORT_OK = qw(&send_arp);
 
 require XSLoader;
@@ -67,27 +66,26 @@ Net::Arping - Ping remote host by ARP packets
 
 =head1 SYNOPSIS
 
-  use Net::Arping;
-  
-  $q = Net::Arping->new();
-  $result = $q->arping($host);
+  use Net::Arping ();
 
-  if ($result) {
-        print "wow... it is alive... Host MAC address is $result\n";
+  my $q = Net::Arping->new();
+
+  if ( my $result = $q->arping($host) ) {
+        print "'$host' is alive, the MAC address is $result\n";
   }
   else {
-        print "Sorry , but $host is dead...\n";
+        print "'$host' is not responding.\n";
   }
 
-  You can also specify source interface and timeout. Default timeout
+You can also specify the source interface and timeout. Default timeout
 is 1 second.
 
-  $result = $q->arping(Host => $host, Interface => 'eth0', Timeout => 4);	
-  if ($result) {
-	print "wow... it is alive... Host MAC address is $result\n";
+  my $result = $q->arping( Host => $host, Interface => 'eth0', Timeout => 4 );
+  if ( $result ) {
+        print "'$host' is alive, the MAC address is $result\n";
   }
   else {
-	print "Sorry, but $host is dead on device eth0...\n";
+        print "'$host' is not responding on eth0.\n";
   }
 
 =head1 DESCRIPTION
@@ -115,9 +113,18 @@ Create a new arping object.
 
 Arping the remote host. Interface and Timeout parameters are optional.
 Default timeout is 1 second. Default device is selected
-by libnet_select_device function. 
+by libnet_select_device function.
+
+=item Net::Arping::send_arp( $host, $interface, $timeout )
+
+An exportable function (NOTE: not a method).
 
 =back
+
+=head1 BUGS
+
+Libnet (up to and including v1.1.2.1) leaks file descriptors, if the C<Interface>
+argument is not provided.  A patch is available; see below.
 
 =head1 COPYRIGHT
                                                                                 
@@ -127,13 +134,13 @@ itself.
 
 =head1 SEE ALSO
 
-pcap(3), libnet(3)
+pcap(3), libnet(3), L<http://cvs.pld-linux.org/SOURCES/libnet-leaking-fd.patch>
 
 =head1 AUTHOR
 
 Oleg Prokopyev, E<lt>riiki@gu.netE<gt>
 
-Maintained by Radoslaw Zielinski E<lt>radek@pld-linux.orgE<gt>.
+Maintained by Radoslaw Zielinski E<lt>radek@pld-linux.orgE<gt>, L<http://radek.cc/>.
 
 =cut
 

@@ -1,5 +1,9 @@
 Revision history for Perl extension Net::Arping.
 
+0.03_02
+	- do not export arping() (wasn't documented anyway)
+	- documentation updates
+
 0.03_01  Tue Nov  4 12:57:27 CET 2008
 	- get rid of signals / longjmp
 	- major cleanup; mostly rewritten; new tests
