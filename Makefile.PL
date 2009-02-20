@@ -21,6 +21,7 @@ local $SIG{__WARN__} = sub {
 
 WriteMakefile(
 	NAME          => 'Net::Arping',
+	LICENSE       => 'perl',
 	VERSION_FROM  => 'Arping.pm',
 	ABSTRACT_FROM => 'Arping.pm',
 	PREREQ_PM     => { 'Test::More' => 0, },

@@ -1,13 +1,14 @@
 --- #YAML:1.0
 name:                Net-Arping
-version:             0.03
+version:             0.03_02
 abstract:            Ping remote host by ARP packets 
-license:             ~
+license:             perl
 author:              
-    - Oleg Prokopyev <riiki@gu.net>
+    - Oleg Prokopyev <riiki@gu.net>, Radoslaw Zielinski <radek@pld-linux.org>
 generated_by:        ExtUtils::MakeMaker version 6.42
 distribution_type:   module
 requires:     
+    Test::More:                    0
 meta-spec:
     url:     http://module-build.sourceforge.net/META-spec-v1.3.html
     version: 1.3
